@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trivia Quiz - Results</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            line-height: 1.6;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+            color: #333;
+        }
+        .container {
+            background-color: white;
+            border-radius: 10px;
+            padding: 30px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            text-align: center;
+            color: #2c3e50;
+            margin-bottom: 30px;
+        }
+        .score-highlight {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .final-score {
+            font-size: 48px;
+            color: #3498db;
+            font-weight: bold;
+            margin: 10px 0;
+        }
+        .congratulations {
+            font-size: 20px;
+            color: #2c3e50;
+        }
+        .performance-summary {
+            background-color: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 30px;
+        }
+        .performance-summary h2 {
+            color: #2c3e50;
+            margin-top: 0;
+            border-bottom: 1px solid #ddd;
+            padding-bottom: 10px;
+        }
+        .summary-stat {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid #eee;
+        }
+        .summary-stat:last-child {
+            border-bottom: none;
+        }
+        .stat-label {
+            font-weight: bold;
+        }
+        .stat-value {
+            color: #3498db;
+        }
+        .data-saved {
+            background-color: #d4edda;
+            color: #155724;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+        .buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 30px;
+        }
+        .button {
+            flex: 1;
+            background-color: #3498db;
+            color: white;
+            text-align: center;
+            padding: 12px 0;
+            text-decoration: none;
+            border-radius: 5px;
+            transition: background-color 0.3s;
+        }
+        .button:hover {
+            background-color: #2980b9;
+        }
+        .button.secondary {
+            background-color: #95a5a6;
+        }
+        .button.secondary:hover {
+            background-color: #7f8c8d;
+        }
+        .question-stats {
+            margin-top: 30px;
+            background-color: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+        }
+        .question-stats h2 {
+            color: #2c3e50;
+            margin-top: 0;
+            border-bottom: 1px solid #ddd;
+            padding-bottom: 10px;
+        }
+        .chart-container {
+            margin-top: 20px;
+            padding: 10px;
+            background-color: white;
+            border-radius: 5px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🏆 Game Results 🏆</h1>
+        
+        <div class="score-highlight">
+            <div class="congratulations">Congratulations, {{ player_name }}!</div>
+            <div class="final-score">{{ score }} points</div>
+        </div>
+        
+        <div class="performance-summary">
+            <h2>Performance Summary</h2>
+            
+            <div class="summary-stat">
+                <div class="stat-label">Total Rounds Played</div>
+                <div class="stat-value">{{ rounds_played }}</div>
+            </div>
+            
+            <div class="summary-stat">
+                <div class="stat-label">Average Accuracy</div>
+                <div class="stat-value">{{ avg_accuracy }}</div>
+            </div>
+            
+            <div class="summary-stat">
+                <div class="stat-label">Average Reaction Time</div>
+                <div class="stat-value">{{ avg_reaction_time }}</div>
+            </div>
+            
+            <div class="summary-stat">
+                <div class="stat-label">Average Attempts per Question</div>
+                <div class="stat-value">{{ avg_attempts }}</div>
+            </div>
+            
+            <div class="summary-stat">
+                <div class="stat-label">Total Time Played</div>
+                <div class="stat-value">{{ total_time }}</div>
+            </div>
+        </div>
+        
+        <div class="question-stats">
+            <h2>Question Statistics</h2>
+            
+            <div class="summary-stat">
+                <div class="stat-label">Total Questions Answered</div>
+                <div class="stat-value">{{ question_stats.total_questions }}</div>
+            </div>
+            
+            <div class="chart-container">
+                <p><strong>Question Distribution by Difficulty:</strong></p>
+                <div id="difficulty-chart" style="height: 200px; width: 100%;"></div>
+            </div>
+        </div>
+        
+        {% if csv_saved %}
+        <div class="data-saved">
+            <p>Your game data has been saved for future analysis!</p>
+            <p>File: {{ csv_path }}</p>
+        </div>
+        {% endif %}
+        
+        <div class="ai-analysis">
+            <h2>AI Analysis</h2>
+            <p>The AI-powered system analyzed your performance and adjusted the difficulty to provide an optimized gaming experience. Your data will help improve the neural network for future gameplay.</p>
+        </div>
+        
+        <div class="buttons">
+            <a href="/restart" class="button">Play Again</a>
+            <a href="/" class="button secondary">New Player</a>
+        </div>
+    </div>
+    
+    <script>
+        // Simple chart to show difficulty distribution
+        document.addEventListener('DOMContentLoaded', function() {
+            const chartContainer = document.getElementById('difficulty-chart');
+            
+            // Dummy data for visualization - in a real app, this would come from the backend
+            const data = {
+                easy: Math.floor(Math.random() * 3) + 1,
+                medium: Math.floor(Math.random() * 4) + 2,
+                hard: Math.floor(Math.random() * 3) + 1
+            };
+            
+            const total = data.easy + data.medium + data.hard;
+            const colors = {
+                easy: '#2ecc71',
+                medium: '#f1c40f',
+                hard: '#e74c3c'
+            };
+            
+            // Create a simple bar chart
+            let html = '';
+            for (const [difficulty, count] of Object.entries(data)) {
+                const percentage = Math.round((count / total) * 100);
+                html += `
+                    <div style="margin-bottom: 10px;">
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+                            <span style="text-transform: capitalize;">${difficulty}</span>
+                            <span>${count} questions (${percentage}%)</span>
+                        </div>
+                        <div style="height: 20px; background-color: #ecf0f1; border-radius: 10px; overflow: hidden;">
+                            <div style="height: 100%; width: ${percentage}%; background-color: ${colors[difficulty]};"></div>
+                        </div>
+                    </div>
+                `;
+            }
+            
+            chartContainer.innerHTML = html;
+        });
+    </script>
+</body>
+</html> 
